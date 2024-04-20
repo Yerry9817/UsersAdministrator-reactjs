@@ -1,20 +1,43 @@
 import { useState } from "react";
+import Alerta from "./Alerta";
 
 const FormUser = ({agregarUsuario}) => {
   const [usuarios, setUsuarios] = agregarUsuario;
-  const[nuevoUsuario, setNuevoUsuario] = useState({name:'',lastName:'',email:''}); 
-  
+  const[nuevoUsuario, setNuevoUsuario] = useState({name:'', lastName:'', email:''}); 
+  const [alerta, setAlerta] = useState({error:false, msg:''});
+
   const handleSubmit = (e)=>{
     e.preventDefault();
     const {name,lastName,email} = nuevoUsuario;
     if([name,lastName,email].includes('')){
+      setAlerta({
+        error:true,
+        msg:"Todos los campos son requeridos"
+      });
+      return;
+    }
+    const isDuplicate = usuarios.some(user => {
+      return user.id === nuevoUsuario.email;
+    });
+
+    if(isDuplicate){
+      setAlerta({
+        error:true,
+        msg:"El email ya ha sido registrado"
+      });
       return;
     }
     setUsuarios([...usuarios, nuevoUsuario]);
+    setNuevoUsuario({name:'', lastName:'', email:''});
+    setAlerta({error:false, msg:''});
   }
+  const {msg} = alerta;
   return (
     <>
     <form onSubmit={handleSubmit} className="bg-white py-10 px-5 mb-10 md:mb-0 shadow-md rounded-md">
+    {msg&&(
+      <Alerta alerta={alerta}/>
+    )}
       <div className="mb-5">
         <label className="uppercase font-bold text-gray-700">Name</label>
         <input className="rounded-md w-full p-2 mt-2 placeholder-gray-400 border" type="text" name="name" value={nuevoUsuario.name}
